@@ -1,32 +1,29 @@
 from tools.campus_info_tool import get_campus_info
+import json
 
-def process_query(user_query):
-    data = get_campus_info()
+def handle_query(user_query: str):
     query = user_query.lower()
 
-    # Office timings
+    with open("data/campus_info.json", "r") as f:
+        data = json.load(f)
+
     if "office" in query or "timing" in query:
         return f"🕘 Office Timings: {data['office_timings']}"
 
-    # College name
-    elif "college name" in query or "name of college" in query:
+    if "college name" in query or "name" in query:
         return f"🏫 College Name: {data['college_name']}"
 
-    # Address
-    elif "address" in query or "location" in query:
+    if "address" in query:
         return f"📍 Address: {data['address']}"
 
-    # Email / contact
-    elif "email" in query or "contact" in query:
+    if "email" in query or "contact" in query:
         return f"📧 Contact Email: {data['contact_email']}"
 
-    # Unknown question
-    else:
-        return (
-            "🤖 I can help with:\n"
-            "- Office timings\n"
-            "- College address\n"
-            "- College contact email\n"
-            "- College name\n\n"
-            "More features coming next week 🚀"
-        )
+    return (
+        "🤖 I can help with:\n"
+        "- Office timings\n"
+        "- College name\n"
+        "- Address\n"
+        "- Contact email\n\n"
+        "More features coming soon 🚀"
+    )
