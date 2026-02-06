@@ -2,5 +2,21 @@
   "college_name": "East West Institute of Technology",
   "address": "Bengaluru, Karnataka, India",
   "office_timings": "9:00 AM to 5:00 PM",
-  "contact_email": "info@eastwestinstitutions.com"
+  "contact_email": "info@eastwestinstitutions.com",
+
+  "departments": [
+    "Computer Science Engineering",
+    "Artificial Intelligence & Machine Learning",
+    "Electronics and Communication",
+    "Mechanical Engineering",
+    "Civil Engineering"
+  ],
+
+  "facilities": [
+    "Library",
+    "Computer Labs",
+    "Hostel",
+    "Cafeteria",
+    "Sports Ground"
+  ]
 }
