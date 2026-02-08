@@ -1,5 +1,5 @@
 import streamlit as st
-from agent.agent_controller import handle_query
+from agent.agent_controller import process_query
 
 st.set_page_config(
     page_title="Interactive Campus Info AI Agent",
@@ -10,12 +10,12 @@ st.title("🎓 Interactive Campus Info AI Agent")
 
 st.write(
     "Welcome! I am your campus information assistant. "
-    "Ask me about office timings and basic campus info."
+    "I will help you with college-related queries."
 )
 
 user_query = st.text_input("Ask your campus question here:")
 
 if user_query:
+    response = process_query(user_query)
     st.markdown("### 🤖 Agent Response")
-    response = handle_query(user_query)
     st.write(response)
