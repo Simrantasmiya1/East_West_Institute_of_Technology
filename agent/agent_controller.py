@@ -2,46 +2,44 @@ from tools.campus_info_tool import get_campus_info
 from tools.departments_tool import get_departments
 from tools.facilities_tool import get_facilities
 
+
 def agent_response(user_query: str) -> str:
     query = user_query.lower()
-    info = get_campus_info()
 
-    # Office timings
-    if any(word in query for word in ["office", "timing", "hours"]):
-        return f"🕘 The college office timings are {info['office_timings']}."
+    # Intent: Office Timings
+    if "office" in query or "timing" in query or "hours" in query:
+        info = get_campus_info()
+        return f"🕘 Office Timings:\n{info['office_timings']}"
 
-    # Address / location
-    if any(word in query for word in ["address", "location", "where"]):
-        return f"📍 The college is located at:\n{info['address']}."
+    # Intent: College Name
+    if "college name" in query or "name of college" in query:
+        info = get_campus_info()
+        return f"🏫 College Name:\n{info['college_name']}"
 
-    # Contact / email
-    if any(word in query for word in ["email", "contact", "mail"]):
-        return f"📧 You can contact the college at:\n{info['contact_email']}."
+    # Intent: Address
+    if "address" in query or "location" in query:
+        info = get_campus_info()
+        return f"📍 College Address:\n{info['address']}"
 
-    # Departments
-    if any(word in query for word in ["department", "branch", "course"]):
+    # Intent: Departments
+    if "department" in query:
         departments = get_departments()
-        return (
-            "🏫 The college offers the following departments:\n"
-            + "\n".join(f"• {dept}" for dept in departments)
-        )
+        dept_list = "\n".join(f"• {d}" for d in departments)
+        return f"🎓 Available Departments:\n{dept_list}"
 
-    # Facilities
-    if any(word in query for word in ["facility", "facilities", "amenities"]):
+    # Intent: Facilities
+    if "facility" in query or "facilities" in query:
         facilities = get_facilities()
-        return (
-            "🏢 The campus provides these facilities:\n"
-            + "\n".join(f"• {facility}" for facility in facilities)
-        )
+        fac_list = "\n".join(f"• {f}" for f in facilities)
+        return f"🏢 Campus Facilities:\n{fac_list}"
 
-    # Polite fallback
+    # Fallback
     return (
-        "🤖 I’m here to help with campus-related information.\n\n"
-        "You can ask me about:\n"
+        "🤖 I can help you with:\n"
         "• Office timings\n"
         "• College address\n"
-        "• Departments or courses\n"
-        "• Campus facilities\n"
-        "• Contact email\n\n"
-        "Please try asking one of these 😊"
+        "• College name\n"
+        "• Departments\n"
+        "• Facilities\n\n"
+        "Please ask a relevant campus-related question 😊"
     )
