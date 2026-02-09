@@ -1,8 +1,9 @@
 import json
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, "data", "campus_info.json")
 
 def get_campus_info():
-    """
-    Tool to fetch public campus information as raw data
-    """
-    with open("data/campus_info.json", "r") as file:
+    with open(DATA_PATH, "r") as file:
         return json.load(file)
