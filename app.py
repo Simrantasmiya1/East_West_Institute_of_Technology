@@ -11,8 +11,13 @@ st.set_page_config(
 st.title("🎓 Interactive Campus Info AI Agent")
 
 st.write(
-    "Welcome! I am your campus information assistant. "
-    "I will help you with college-related queries."
+    "Welcome! 👋 I am your campus information assistant.\n\n"
+    "You can ask me about:\n"
+    "• Office timings\n"
+    "• College address\n"
+    "• Departments or courses\n"
+    "• Campus facilities\n"
+    "• Contact email"
 )
 
 # User input
