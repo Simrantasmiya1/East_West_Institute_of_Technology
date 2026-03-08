@@ -1,11 +1,65 @@
-# EWIT
-Project Submission Repository
+# AI Campus Career Intelligence System
 
-## Video Link
-https://drive.google.com/file/d/1_QXzoIZ-0RiOro4zS6bYSZXmL8BMjfPx/view?usp=sharing
-## What is your day-wise plan for the upcoming weeks?
+An intelligent AI-powered system that helps students choose the right engineering branch and plan their career using conversational AI and analytics.
 
-## Explain ini brief what all you did in last two weeks?
+---
 
-## Any other link (if needs to be submitted)
+## Project Overview
 
+Many students struggle to choose the correct career path after school.  
+Our AI Campus Career Intelligence System acts as an intelligent advisor that analyzes student interests and provides personalized academic guidance.
+
+The system recommends suitable engineering branches, analyzes career opportunities, and provides a structured roadmap for success.
+
+---
+
+## Key Features
+
+- AI-powered career recommendation
+- Conversational AI interface
+- Branch suitability dashboard
+- Career intelligence analysis
+- Skill gap analysis
+- 4-Year success roadmap
+- AI Career Report PDF generator
+
+---
+
+## Technology Stack
+
+Frontend: Streamlit  
+Backend: Python  
+Visualization: Plotly  
+Data: JSON  
+Version Control: GitHub
+
+---
+
+## How to Run the Project
+
+1. Clone the repository
+
+git clone https://github.com/Simrantasmiya1/Fast_West_Institute_of_Technology
+
+2. Install required libraries
+
+pip install streamlit pandas plotly
+
+3. Run the application
+
+streamlit run app.py
+
+---
+
+## Future Improvements
+
+- Interview preparation AI
+- Learning resource recommendations
+- Advanced career prediction
+- Cloud deployment
+
+---
+
+## Author
+
+Simran Tasmiya
