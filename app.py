@@ -1,36 +1,108 @@
 import streamlit as st
+import pandas as pd
+import plotly.express as px
+import os
 from agent.agent_controller import agent_response
 
-# Page configuration
 st.set_page_config(
-    page_title="Interactive Campus Info AI Agent",
-    page_icon="🎓",
-    layout="centered"
+    page_title="AI Campus Intelligence System",
+    layout="wide"
 )
 
-# Header
-st.markdown("## 🎓 Interactive Campus Info AI Agent")
+st.title("🎓 AI Campus Career Intelligence Dashboard")
+
 st.write(
-    "Welcome! I am your campus information assistant. "
-    "Ask me anything related to your college."
+    "Ask me anything about departments, career guidance, or branch recommendations."
 )
 
-st.divider()
+# ==============================
+# 🔥 MEMORY INITIALIZATION
+# ==============================
 
-# Input box
-user_query = st.text_input(
-    "💬 Ask your campus question here:",
-    placeholder="e.g. What departments are available?"
-)
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-# Response section
+if "interest" not in st.session_state:
+    st.session_state.interest = None
+
+if "branch_scores" not in st.session_state:
+    st.session_state.branch_scores = {}
+
+# ==============================
+# 🔹 INPUT
+# ==============================
+
+user_query = st.text_input("💬 Ask your question:")
+
 if user_query:
-    with st.spinner("Thinking... 🤖"):
-        response = agent_response(user_query)
+    response = agent_response(user_query, st.session_state)
 
-    st.markdown("### 🤖 Agent Response")
-    st.success(response)
+    st.session_state.chat_history.append(("You", user_query))
+    st.session_state.chat_history.append(("Agent", response))
 
-# Footer
-st.divider()
-st.caption("🚀 Built as part of Agentic AI Hackathon | Week-5")
+# ==============================
+# 🔹 LAYOUT
+# ==============================
+
+col1, col2 = st.columns([2, 1])
+
+# ------------------------------
+# Conversation Section
+# ------------------------------
+
+with col1:
+    st.subheader("💬 Conversation")
+
+    for speaker, message in st.session_state.chat_history:
+        if speaker == "You":
+            st.markdown(f"👤 **You:** {message}")
+        else:
+            st.markdown(f"🤖 **Agent:** {message}")
+
+# ------------------------------
+# Dashboard Section
+# ------------------------------
+
+with col2:
+    st.subheader("📊 Branch Suitability Dashboard")
+
+    scores = st.session_state.get("branch_scores", {})
+
+    if scores:
+
+        df = pd.DataFrame({
+            "Branch": list(scores.keys()),
+            "Score": list(scores.values())
+        })
+
+        fig = px.bar(
+            df,
+            x="Branch",
+            y="Score",
+            color="Score",
+            color_continuous_scale="viridis",
+            title="AI Suitability Ranking"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.metric(
+            label="🎯 AI Confidence Level",
+            value=f"{max(scores.values())}%"
+        )
+
+    else:
+        st.info("Ask about coding, AI, or machines to see AI analysis dashboard.")
+
+# ==============================
+# 📄 PDF DOWNLOAD
+# ==============================
+
+if os.path.exists("AI_Career_Report.pdf"):
+    with open("AI_Career_Report.pdf", "rb") as file:
+        st.download_button(
+            label="📄 Download AI Career Report",
+            data=file,
+            file_name="AI_Career_Report.pdf",
+            mime="application/pdf"
+        )
