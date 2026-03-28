@@ -1,3 +1,4 @@
+from tools.agent_pipeline import detect_intent, memory_engine, build_response
 from tools.campus_info_tool import get_campus_info
 from tools.departments_tool import get_departments
 from tools.facilities_tool import get_facilities
@@ -21,25 +22,20 @@ def career_scoring_engine(query, memory):
 
     interest = memory.get("interest")
 
-    # Coding Interest
     if "coding" in query or interest == "coding":
         scores["Computer Science & Engineering"] += 40
         scores["Artificial Intelligence & Machine Learning"] += 35
 
-    # AI Interest
     if "ai" in query or "machine learning" in query or interest == "ai":
         scores["Artificial Intelligence & Machine Learning"] += 45
         scores["Computer Science & Engineering"] += 25
 
-    # Mechanical Interest
     if "machine" in query or "mechanical" in query or interest == "mechanical":
         scores["Mechanical Engineering"] += 45
 
-    # Electronics
     if "electronics" in query:
         scores["Electronics & Communication"] += 40
 
-    # Civil
     if "design" in query:
         scores["Civil Engineering"] += 35
 
@@ -101,35 +97,24 @@ def skill_gap_analysis(branch):
 
     skill_map = {
         "Computer Science & Engineering": [
-            "Python",
-            "Data Structures",
-            "Algorithms",
-            "Web Development",
-            "Cloud Computing"
+            "Python", "Data Structures", "Algorithms", "Web Development", "Cloud Computing"
         ],
         "Artificial Intelligence & Machine Learning": [
-            "Python",
-            "Linear Algebra",
-            "Machine Learning",
-            "Deep Learning",
-            "Data Analysis"
+            "Python", "Linear Algebra", "Machine Learning", "Deep Learning", "Data Analysis"
         ],
         "Mechanical Engineering": [
-            "CAD Design",
-            "Thermodynamics",
-            "Robotics",
-            "Manufacturing Systems"
+            "CAD Design", "Thermodynamics", "Robotics", "Manufacturing Systems"
         ]
     }
 
     skills = skill_map.get(branch, ["Core Technical Skills"])
 
-    formatted_skills = "\n".join([f"• {skill}" for skill in skills])
+    formatted = "\n".join([f"• {s}" for s in skills])
 
     return (
         "🎯 Skill Gap Analysis:\n"
         "To succeed in this branch, focus on:\n"
-        f"{formatted_skills}"
+        f"{formatted}"
     )
 
 
@@ -172,28 +157,25 @@ def generate_roadmap(branch):
 
 
 # =====================================================
-# 🤖 MAIN AGENT RESPONSE
+# 🤖 MAIN AGENT
 # =====================================================
 
 def agent_response(query, memory):
+
     query = query.lower()
 
-    # 🔹 INTEREST DETECTION
-    if "coding" in query:
-        memory["interest"] = "coding"
+    # 🔥 Intent + Memory
+    intent = detect_intent(query)
+    memory_engine(memory, query)
 
-    elif "ai" in query or "machine learning" in query:
-        memory["interest"] = "ai"
+    # =====================================================
+    # 🎯 CAREER INTELLIGENCE
+    # =====================================================
 
-    elif "machine" in query or "mechanical" in query:
-        memory["interest"] = "mechanical"
-
-    # 🔹 CAREER ANALYSIS
-    if "branch" in query or "career" in query or "future" in query:
+    if intent == "career":
 
         best_branch, ranked, confidence = career_scoring_engine(query, memory)
 
-        # Store scores for dashboard
         memory["branch_scores"] = {
             branch: min(100, score + 60)
             for branch, score in ranked if score > 0
@@ -201,101 +183,75 @@ def agent_response(query, memory):
 
         roadmap = generate_roadmap(best_branch)
         intelligence = career_intelligence_engine(best_branch)
-        skill_analysis = skill_gap_analysis(best_branch)
+        skills = skill_gap_analysis(best_branch)
 
-        # Dynamic Career Roles
-        if "Computer Science" in best_branch:
-            careers = [
-                "Software Engineer",
-                "Full Stack Developer",
-                "Cloud Engineer",
-                "Cybersecurity Analyst"
-            ]
+        # Careers
+        careers = [
+            "Software Engineer",
+            "AI Engineer",
+            "Data Scientist",
+            "Cloud Engineer"
+        ]
 
-        elif "Artificial Intelligence" in best_branch:
-            careers = [
-                "Machine Learning Engineer",
-                "AI Research Scientist",
-                "Data Scientist",
-                "Robotics Engineer"
-            ]
+        # 🔥 FIXED PDF ERROR
+        try:
+            generate_career_report({
+                "best_branch": best_branch,
+                "ranking": memory["branch_scores"],
+                "careers": careers,
+                "roadmap": roadmap,
+                "confidence": confidence
+            })
+        except:
+            pass
 
-        elif "Mechanical" in best_branch:
-            careers = [
-                "Automotive Engineer",
-                "Robotics Engineer",
-                "Manufacturing Engineer",
-                "Aerospace Engineer"
-            ]
-
-        else:
-            careers = [
-                "Technical Consultant",
-                "Project Engineer"
-            ]
-
-        # Generate PDF
-        generate_career_report({
-            "best_branch": best_branch,
-            "ranking": memory["branch_scores"],
-            "careers": careers,
-            "roadmap": roadmap,
-            "confidence": confidence
-        })
-
-        formatted_scores = "\n".join(
-            [f"• {branch} → {score}%" for branch, score in memory["branch_scores"].items()]
+        # Formatting
+        scores_text = "\n".join(
+            [f"• {b} → {s}%" for b, s in memory["branch_scores"].items()]
         )
 
-        formatted_roadmap = "\n".join(
-            [f"{year}: {content}" for year, content in roadmap.items()]
+        roadmap_text = "\n".join(
+            [f"{y}: {c}" for y, c in roadmap.items()]
         )
 
-        formatted_careers = "\n".join(
-            [f"• {career}" for career in careers]
-        )
+        careers_text = "\n".join([f"• {c}" for c in careers])
 
-        return (
-            "🧠 AI Career Intelligence Report\n\n"
-            f"🏆 Best Fit Branch: {best_branch}\n\n"
-            "📊 Suitability Ranking:\n"
-            f"{formatted_scores}\n\n"
-            f"{intelligence}\n\n"
-            f"{skill_analysis}\n\n"
-            "🚀 Future Career Roles:\n"
-            f"{formatted_careers}\n\n"
-            "🛣 4-Year Success Roadmap:\n"
-            f"{formatted_roadmap}\n\n"
+        # 🔥 Structured Output (VERY IMPORTANT)
+        return build_response([
+            "🧠 AI Career Intelligence Report",
+            f"🏆 Best Fit Branch: {best_branch}",
+            "📊 Suitability Ranking:\n" + scores_text,
+            intelligence,
+            skills,
+            "🚀 Career Roles:\n" + careers_text,
+            "🛣 Roadmap:\n" + roadmap_text,
             f"📊 Confidence Score: {confidence}%"
-        )
+        ])
 
-    # 🔹 FACILITIES
+    # =====================================================
+    # 🏫 OTHER QUERIES
+    # =====================================================
+
     elif "facilities" in query:
         facilities = get_facilities()
-        formatted = "\n".join([f"• {fac}" for fac in facilities])
-        return f"🏢 Campus Facilities:\n{formatted}\n\n📊 Confidence Score: 100%"
+        return "🏢 Campus Facilities:\n" + "\n".join([f"• {f}" for f in facilities])
 
-    # 🔹 DEPARTMENTS
     elif "departments" in query:
         departments = get_departments()
-        formatted = "\n".join([f"• {dept}" for dept in departments])
-        return f"🎓 Available Departments:\n{formatted}\n\n📊 Confidence Score: 100%"
+        return "🎓 Departments:\n" + "\n".join([f"• {d}" for d in departments])
 
-    # 🔹 COLLEGE INFO
     elif "college name" in query:
         campus = get_campus_info()
-        return f"🏫 College Name: {campus['college_name']}\n\n📊 Confidence Score: 100%"
+        return f"🏫 {campus['college_name']}"
 
-    # 🔹 FALLBACK
+    # =====================================================
+    # 🤖 FALLBACK
+    # =====================================================
+
     return (
-        "🤖 I can help with:\n"
-        "• Branch recommendations\n"
-        "• Career prediction\n"
-        "• Market intelligence analysis\n"
-        "• Skill gap analysis\n"
-        "• 4-Year roadmap planning\n"
+        "🤖 Try asking:\n"
+        "• Best branch\n"
+        "• Career options\n"
         "• Facilities\n"
-        "• Departments\n"
-        "• College information\n\n"
-        "📊 Confidence Score: 65%"
+        "• Departments"
     )
