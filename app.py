@@ -4,51 +4,23 @@ import plotly.express as px
 import os
 from agent.agent_controller import agent_response
 
-# 🎤 Voice support (safe import)
-try:
-    from streamlit_mic_recorder import mic_recorder
-    VOICE_AVAILABLE = True
-except:
-    VOICE_AVAILABLE = False
-
-# =====================================================
-# ⚙️ PAGE CONFIG
-# =====================================================
-
+# ==============================
+# 🎯 PAGE CONFIG
+# ==============================
 st.set_page_config(
     page_title="AI Campus Intelligence System",
     layout="wide"
 )
 
-# =====================================================
-# 🎨 UI STYLE
-# =====================================================
+st.title("🎓 AI Campus Career Intelligence Dashboard")
 
-st.markdown("""
-<style>
-.big-title {
-    font-size:40px !important;
-    font-weight:700;
-    color:#4CAF50;
-    text-align:center;
-}
-.card {
-    padding:20px;
-    border-radius:15px;
-    background-color:#f5f5f5;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-}
-</style>
-""", unsafe_allow_html=True)
+st.write(
+    "Ask me anything about departments, career guidance, or branch recommendations."
+)
 
-st.markdown('<div class="big-title">🎓 AI Campus Career Intelligence Dashboard</div>', unsafe_allow_html=True)
-
-st.write("Ask me anything about departments, career guidance, or branch recommendations.")
-
-# =====================================================
+# ==============================
 # 🔥 MEMORY INITIALIZATION
-# =====================================================
-
+# ==============================
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
@@ -58,72 +30,75 @@ if "interest" not in st.session_state:
 if "branch_scores" not in st.session_state:
     st.session_state.branch_scores = {}
 
-# =====================================================
-# 🔹 INPUT SECTION (FIXED)
-# =====================================================
+if "input_box" not in st.session_state:
+    st.session_state.input_box = ""
 
-text_query = st.text_input("💬 Ask your question:")
+# ==============================
+# 🔥 FUNCTION: HANDLE TEXT INPUT
+# ==============================
+def handle_submit():
+    user_query = st.session_state.input_box.strip()
 
-voice_query = None
-
-# 🎤 Voice Input
-if VOICE_AVAILABLE:
-    st.subheader("🎤 Voice Input")
-    audio = mic_recorder(start_prompt="Start Recording", stop_prompt="Stop")
-
-    if audio:
-        st.success("Voice recorded (Demo mode)")
-        voice_query = "I like coding"   # demo simulation
-
-# 👉 PRIORITY: TEXT > VOICE
-user_query = None
-
-if text_query:
-    user_query = text_query
-elif voice_query:
-    user_query = voice_query
-
-# =====================================================
-# 🤖 PROCESS INPUT (NO DUPLICATE FIX)
-# =====================================================
-
-if user_query and (
-    len(st.session_state.chat_history) == 0 or
-    st.session_state.chat_history[-1][1] != user_query
-):
-    with st.spinner("🤖 AI is thinking..."):
+    if user_query:
         response = agent_response(user_query, st.session_state)
 
-    st.session_state.chat_history.append(("You", user_query))
-    st.session_state.chat_history.append(("Agent", response))
+        st.session_state.chat_history.append(("You", user_query))
+        st.session_state.chat_history.append(("Agent", response))
 
-# =====================================================
+        # ✅ SAFE CLEAR (IMPORTANT FIX)
+        st.session_state.input_box = ""
+
+# ==============================
+# 💬 TEXT INPUT (FIXED)
+# ==============================
+st.text_input(
+    "💬 Ask your question:",
+    key="input_box",
+    on_change=handle_submit
+)
+
+# ==============================
+# 🎤 VOICE INPUT (IMPROVED)
+# ==============================
+st.subheader("🎤 Voice Input")
+
+voice_text = st.text_input("Simulate voice input:", key="voice_box")
+
+if st.button("🎙 Submit Voice"):
+    if voice_text.strip():
+        response = agent_response(voice_text, st.session_state)
+
+        st.session_state.chat_history.append(("You (Voice)", voice_text))
+        st.session_state.chat_history.append(("Agent", response))
+
+# ==============================
+# 🗑 CLEAR CHAT
+# ==============================
+if st.button("🗑 Clear Chat"):
+    st.session_state.chat_history = []
+    st.session_state.branch_scores = {}
+    st.session_state.interest = None
+
+# ==============================
 # 🔹 LAYOUT
-# =====================================================
-
+# ==============================
 col1, col2 = st.columns([2, 1])
 
 # ------------------------------
-# 💬 CHAT SECTION
+# 💬 Conversation Section
 # ------------------------------
-
 with col1:
     st.subheader("💬 Conversation")
 
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-
     for speaker, message in st.session_state.chat_history:
-        if speaker == "You":
-            st.markdown(f"👤 **You:** {message}")
+        if speaker.startswith("You"):
+            st.markdown(f"👤 **{speaker}:** {message}")
         else:
             st.markdown(f"🤖 **Agent:** {message}")
 
-    st.markdown('</div>', unsafe_allow_html=True)
-
 # ------------------------------
-# 📊 DASHBOARD
+# 📊 Dashboard Section
 # ------------------------------
-
 with col2:
     st.subheader("📊 Branch Suitability Dashboard")
 
@@ -154,10 +129,9 @@ with col2:
     else:
         st.info("Ask about coding, AI, or machines to see AI analysis dashboard.")
 
-# =====================================================
+# ==============================
 # 📄 PDF DOWNLOAD
-# =====================================================
-
+# ==============================
 if os.path.exists("AI_Career_Report.pdf"):
     with open("AI_Career_Report.pdf", "rb") as file:
         st.download_button(
